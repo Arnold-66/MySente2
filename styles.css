@@ -1,6 +1,6 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
-    
+    margin:0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -57,7 +57,6 @@ i {
     cursor: pointer;
 }
 .main1 {
-margin-top: 4em;
    padding-top: 20px;
    width: 350px;
    background-color: black;
@@ -84,7 +83,6 @@ margin-top: 4em;
     margin-left: 1.2em;
 }
 form {
-margin-top:5em;
     padding: 20px;
     width: 310px;
     background-color: rgb(8, 8, 8);
@@ -95,7 +93,6 @@ margin-top:5em;
     border-radius: 8px;
 }
 .form1 {
-margin-top:5em;
     padding: 20px;
     width: 310px;
     background-color: rgb(8, 8, 8);
