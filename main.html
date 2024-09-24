@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySente</title>
+    <style>
+        /* Basic styles */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin-left: -1em;
+
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* Balance section */
+        #balance-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        #balance-display {
+            font-size: 2rem;
+        }
+        #pie-chart {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(#6bc3ff 0% 33%, #ff6b6b 33% 66%, #ffd166 66% 100%);
+        }
+        #pie-chart-legend {
+            margin-top: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        /* Input fields */
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff4d4d;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        /* Overlay styles */
+        #settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #settings-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+
+        }
+        #expense-limit {
+            width: 378px;
+        }
+        #report-btn {
+            float: right;
+            
+        }
+        /* Expense and income lists */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>MySente</h1>
+    <section id="balance-section">
+        <div>
+            <h2>Balance: <span id="balance">Ush 0</span></h2>
+            <p>Total Income: <span id="total-income">Ush 0.00</span></p>
+            <p>Total Expenses: <span id="total-expenses">Ush 0.00</span></p>
+            <p>Remaining Balance: <span id="remaining-balance">Ush 0.00</span></p>
+        </div>
+        <div>
+            <h2>Pie Chart</h2>
+            <div id="pie-chart"></div>
+            <div id="pie-chart-legend"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Add Income</h2>
+        <input type="text" id="income-name" placeholder="Income Name">
+        <input type="number" id="income-amount" placeholder="Amount">
+        <button id="add-income-btn">Add Income</button>
+    </section>
+
+    <section>
+        <h2>Add Expense</h2>
+        <input type="text" id="expense-name" placeholder="Expense Name">
+        <input type="number" id="expense-amount" placeholder="Amount">
+        <button id="add-expense-btn">Add Expense</button>
+    </section>
+
+    <section>
+        <h2>Expense List</h2>
+        <ul id="expense-list"></ul>
+    </section>
+
+    <section id="income-flow-section">
+        <h2>Income Flow Statement</h2>
+        <ul id="income-flow-list"></ul>
+    </section>
+
+    <div style="text-align: center; margin: 20px;">
+        <button id="settings-icon">⚙️ Settings</button>
+    </div>
+
+    <div id="settings-overlay">
+        <div id="settings-content">
+            <button id="close-settings" style="position: absolute; top: 10px; right: 10px;">🏠</button>
+            <h2>Settings</h2>
+            <div>
+                <label for="expense-limit">Set Expense Limit</label>
+                <input type="number" id="expense-limit" placeholder="Enter limit amount">
+            </div>
+            <div>
+                <label for="limit-period">Select Limit Period</label>
+                <select id="limit-period">
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                </select>
+            </div>
+            <button id="save-settings-btn">Save Settings</button>
+
+            <h2>Report Issue</h2>
+            <textarea id="report-feedback" placeholder="Your feedback or issue report" rows="4" cols="30"></textarea>
+            <button id="report-btn">Report</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initial state variables
+let balance = 0.00;
+let totalIncome = 0;
+let totalExpenses = 0;
+let expenseLimit = null;
+let currentExpenses = 0;
+const incomes = [];
+const expenses = [];
+
+// DOM Elements
+const balanceDisplay = document.getElementById('balance');
+const totalIncomeDisplay = document.getElementById('total-income');
+const totalExpensesDisplay = document.getElementById('total-expenses');
+const remainingBalanceDisplay = document.getElementById('remaining-balance');
+const expenseList = document.getElementById('expense-list');
+const pieChart = document.getElementById('pie-chart');
+const incomeFlowList = document.getElementById('income-flow-list');
+const expenseLimitInput = document.getElementById('expense-limit');
+const limitPeriodInput = document.getElementById('limit-period');
+
+// Add Income
+document.getElementById('add-income-btn').addEventListener('click', () => {
+    const incomeName = document.getElementById('income-name').value;
+    const incomeAmount = parseFloat(document.getElementById('income-amount').value);
+    if (incomeName && !isNaN(incomeAmount) && incomeAmount > 0) {
+        incomes.push({ name: incomeName, amount: incomeAmount });
+        totalIncome += incomeAmount;
+        balance += incomeAmount;
+        updateIncomeFlow(incomeName, incomeAmount);
+        updateUI();
+    }
+    document.getElementById('income-name').value = '';
+    document.getElementById('income-amount').value = '';
+});
+
+// Add Expense
+document.getElementById('add-expense-btn').addEventListener('click', () => {
+    const expenseName = document.getElementById('expense-name').value;
+    const expenseAmount = parseFloat(document.getElementById('expense-amount').value);
+   
+    if (expenseLimit && currentExpenses + expenseAmount > expenseLimit) {
+        alert("You have reached your expense limit for the selected period.");
+        return;
+    }
+
+    if (expenseName && !isNaN(expenseAmount) && expenseAmount > 0) {
+        expenses.push({ name: expenseName, amount: expenseAmount });
+        totalExpenses += expenseAmount;
+        currentExpenses += expenseAmount;
+        balance -= expenseAmount;
+        addExpenseToList(expenseName, expenseAmount);
+        updateUI();
+    }
+    document.getElementById('expense-name').value = '';
+    document.getElementById('expense-amount').value = '';
+});
+
+// Function to update the UI with new values
+function updateUI() {
+    balanceDisplay.innerText = `Ush ${balance.toFixed(2)}`;
+    totalIncomeDisplay.innerText = `Ush ${totalIncome.toFixed(2)}`;
+    totalExpensesDisplay.innerText = `Ush ${totalExpenses.toFixed(2)}`;
+    remainingBalanceDisplay.innerText = `Ush ${balance.toFixed(2)}`;
+    updatePieChart();
+}
+
+// Function to dynamically update the pie chart
+function updatePieChart() {
+    const total = totalIncome + totalExpenses;
+    let pieSlices = [];
+    let pieColors = ['#6bc3ff', '#ff6b6b', '#ffd166'];
+
+    if (totalIncome > 0) {
+        pieSlices.push({ name: 'Income', percent: (totalIncome / total) * 100, color: pieColors 
+        [0] });
+    }
+    if (totalExpenses > 0) {
+        pieSlices.push({ name: 'Expenses', percent: (totalExpenses / total) * 100, color: pieColors[1] });
+    }
+
+    // Update pie chart legend
+    const legend = pieSlices.map(slice => `<div class="legend-item"><span class="legend-color" style="background: ${slice.color};"></span>${slice.name}: ${slice.percent.toFixed(2)}%</div>`).join('');
+    document.getElementById('pie-chart-legend').innerHTML = legend;
+
+    // Update pie chart appearance
+    pieChart.style.background = `conic-gradient(${pieSlices.map((slice, index) => `${slice.color} 0% ${slice.percent}%, `).join('').slice(0, -2)})`;
+}
+
+// Add Expense to List
+function addExpenseToList(name, amount) {
+    const listItem = document.createElement('li');
+    listItem.innerText = `${name}: Ush ${amount.toFixed(2)}`;
+    expenseList.appendChild(listItem);
+}
+
+// Update Income Flow Statement
+function updateIncomeFlow(name, amount) {
+    const listItem = document.createElement('li');
+    listItem.innerText = `${name}: Ush ${amount.toFixed(2)}`;
+    incomeFlowList.appendChild(listItem);
+}
+
+// Settings functionality
+document.getElementById('settings-icon').addEventListener('click', () => {
+    document.getElementById('settings-overlay').style.display = 'flex';
+});
+
+document.getElementById('close-settings').addEventListener('click', () => {
+    document.getElementById('settings-overlay').style.display = 'none';
+});
+
+// Save settings
+document.getElementById('save-settings-btn').addEventListener('click', () => {
+    const limitAmount = parseFloat(expenseLimitInput.value);
+    if (!isNaN(limitAmount) && limitAmount > 0) {
+        expenseLimit = limitAmount;
+        alert(`Expense limit set to Ush ${expenseLimit}`);
+    }
+    expenseLimitInput.value = '';
+});
+
+// Report issue functionality
+document.getElementById('report-btn').addEventListener('click', () => {
+    const feedback = document.getElementById('report-feedback').value;
+    if (feedback) {
+        alert("Thank you for your feedback!");
+        document.getElementById('report-feedback').value = '';
+    } else {
+        alert("Please enter your feedback before submitting.");
+    }
+});
+</script>
+
+</body>
+</html> 

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="styles.css" rel="stylesheet">
+    <title>Sign up</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="main1">
+        <img class="logo" src="logo.png" alt="KampusKonect logo">
+        <p class="p1">Sign up to MySente</p>
+        <form action="#" class="form1" method="post">
+            <label for="email">Email</label>
+            <input id="email" type="email" class="email" required>
+           
+            <label for="password">Password</label>
+            <input id="password" type="password" class="password" required>
+           
+            <label for="confirm-password">Confirm Password</label>
+            <input id="confirm-password" type="password" class="password" required>
+           
+            <input type="submit" class="submit" value="Submit">
+        </form>
+
+        <div class="sgnopt2">
+            <!-- Google Sign-In Button -->
+            <button id="google-btn" class="submit">Sign In With Google</button>
+        </div>
+
+            <p class="dont">Already have an account? <a href="index.html">Sign in</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase configuration and Google sign-in implementation
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBe1nnzEVZdI0aovRXQ78gWyfdKKsXHRI4",
+            authDomain: "mysente-3ae15.firebaseapp.com",
+            projectId: "mysente-3ae15",
+            storageBucket: "mysente-3ae15.appspot.com",
+            messagingSenderId: "462534406115",
+            appId: "1:462534406115:web:0294ae9d0aa9e65213bad6",
+            measurementId: "G-BGM1Y5PFJE"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        auth.languageCode = 'en';
+        const provider = new GoogleAuthProvider();
+
+        // Google Sign-In event listener
+        const googleLogin = document.getElementById("google-btn");
+        googleLogin.addEventListener("click", function() {
+            signInWithPopup(auth, provider)
+            .then((result) => {
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                const user = result.user;
+                console.log(user);
+                window.location.href = "main.html"; // Redirect on success
+            })
+            .catch((error) => {
+                console.error("Error:", error.message);
+            });
+        });
+    </script>
+</body>
+</html> 
