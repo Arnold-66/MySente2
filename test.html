@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Form</title>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <form action="" id="feedback-info">
+        <label for="first-name">First Name</label>
+        <input type="text" id="first-name">
+        <label for="last-name">Last Name</label>
+        <input type="text" id="last-name">
+        <label for="email">Email</label>
+        <input type="text" id="email">
+        <textarea id="report-feedback" placeholder="Your feedback or issue report" rows="4" cols="33"></textarea>
+        <button id="report-btn" type="button">Report</button>
+        <button id="close3" type="button">Close</button>
+    </form>
+    
+    <script type="text/javascript">
+        const firebaseConfig = {
+            apiKey: "AIzaSyBe1nnzEVZdI0aovRXQ78gWyfdKKsXHRI4",
+            authDomain: "mysente-3ae15.firebaseapp.com",
+            projectId: "mysente-3ae15",
+            storageBucket: "mysente-3ae15.appspot.com",
+            messagingSenderId: "462534406115",
+            appId: "1:462534406115:web:0294ae9d0aa9e65213bad6",
+            measurementId: "G-BGM1Y5PFJE"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        document.getElementById('report-btn').addEventListener('click', function() {
+            var firstName = document.getElementById('first-name').value;
+            var lastName = document.getElementById('last-name').value;
+            var email = document.getElementById('email').value;
+            var feedback = document.getElementById('report-feedback').value;
+
+            // Save feedback to Firestore
+            db.collection("feedbacks").add({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                feedback: feedback,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() // Optional: Add a timestamp
+            })
+            .then(function() {
+                alert('Feedback sent successfully!');
+            })
+            .catch(function(error) {
+                alert('Failed to send feedback, please try again later. Error: ' + error);
+            });
+        });
+    </script>
+</body>
+</html>
